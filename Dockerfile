@@ -1,17 +1,16 @@
-FROM openjdk:21-bookworm AS builder
+FROM maven:3-eclipse-temurin-21 AS builder
 
-WORKDIR /src
+ARG APP_DIR=/app
+WORKDIR ${APP_DIR}
 
-COPY src src
-COPY .mvn .mvn
 COPY mvnw .
-COPY mvnw.cmd .
 COPY pom.xml .
+COPY .mvn .mvn
+COPY src src
 
-# compile the Java application
-RUN mvn package -Dmvn.test.skip=true
+RUN mvn package -Dmaven.test.skip=true
 
-FROM openjdk:21-bookworm 
+FROM maven:3-eclipse-temurin-21 
 
 WORKDIR /app
 
@@ -21,4 +20,4 @@ COPY --from=builder /src/target/eventmanagement-0.0.1-SNAPSHOT.jar app.jar
 ENV PORT=8080
 EXPOSE $PORT
 
-ENTRYPOINT SERVER_PORT=${PORT} java -jar ./app.jar
+ENTRYPOINT SERVER_PORT=${PORT} java -jar target/eventmanagement-0.0.1-SNAPSHOT.jar
